@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AskAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="grain"></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="logo">
+        <span class="logo-mark">A</span>
+        <span class="logo-text">AskAI</span>
+      </div>
+      <p class="tagline">Your intelligent companion</p>
+    </div>
+    <div class="sidebar-actions">
+      <button class="btn-new" id="newChat">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Chat
+      </button>
+    </div>
+    <div class="sidebar-info">
+      <div class="info-chip">Multi-turn memory</div>
+      <div class="info-chip">Powered by Claude</div>
+      <div class="info-chip">Session history saved</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="chat-container" id="chatContainer">
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">✦</div>
+        <h1>What can I help you with?</h1>
+        <p>Ask me anything — I remember our full conversation.</p>
+        <div class="suggestions">
+          <button class="suggestion" data-text="Explain quantum computing in simple terms">Explain quantum computing</button>
+          <button class="suggestion" data-text="Write a Python function to reverse a string">Write Python code</button>
+          <button class="suggestion" data-text="What are 3 tips for better productivity?">Productivity tips</button>
+          <button class="suggestion" data-text="Summarize the history of the internet">History of the internet</button>
+        </div>
+      </div>
+      <div class="messages" id="messages"></div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrapper">
+        <textarea
+          id="userInput"
+          placeholder="Ask anything..."
+          rows="1"
+          autocomplete="off"
+        ></textarea>
+        <button class="send-btn" id="sendBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+      <p class="input-hint">Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line</p>
+    </div>
+  </main>
+
+  <script src="/static/js/main.js"></script>
+</body>
+</html>

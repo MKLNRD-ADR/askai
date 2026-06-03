@@ -7,31 +7,30 @@ const newChatBtn = document.getElementById("newChat");
 
 let isLoading = false;
 
-// Auto-resize textarea
+// Enable/disable send button based on input
 userInput.addEventListener("input", () => {
   userInput.style.height = "auto";
-  userInput.style.height = Math.min(userInput.scrollHeight, 140) + "px";
+  userInput.style.height = Math.min(userInput.scrollHeight, 160) + "px";
+  sendBtn.disabled = userInput.value.trim() === "";
 });
 
-// Send on Enter, newline on Shift+Enter
 userInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
-    sendMessage();
+    if (!sendBtn.disabled) sendMessage();
   }
 });
 
 sendBtn.addEventListener("click", sendMessage);
 
-// Suggestion chips
 document.querySelectorAll(".suggestion").forEach((btn) => {
   btn.addEventListener("click", () => {
     userInput.value = btn.dataset.text;
+    userInput.dispatchEvent(new Event("input"));
     sendMessage();
   });
 });
 
-// New chat
 newChatBtn.addEventListener("click", async () => {
   await fetch("/clear", { method: "POST" });
   messagesEl.innerHTML = "";
@@ -39,26 +38,22 @@ newChatBtn.addEventListener("click", async () => {
   welcomeEl.style.opacity = "1";
 });
 
-// Load existing history on page load
 async function loadHistory() {
   try {
     const res = await fetch("/history");
     const history = await res.json();
     if (history.length > 0) {
       hideWelcome();
-      history.forEach((msg) => {
-        appendMessage(msg.role, msg.content, "", false);
-      });
+      history.forEach((msg) => appendMessage(msg.role, msg.content, "", false));
       scrollToBottom();
     }
-  } catch (e) {
-    console.error("Failed to load history", e);
-  }
+  } catch (e) { console.error(e); }
 }
 
 function hideWelcome() {
+  welcomeEl.style.transition = "opacity 0.2s";
   welcomeEl.style.opacity = "0";
-  setTimeout(() => (welcomeEl.style.display = "none"), 300);
+  setTimeout(() => (welcomeEl.style.display = "none"), 200);
 }
 
 function scrollToBottom() {
@@ -70,7 +65,6 @@ function formatTime() {
 }
 
 function formatContent(text) {
-  // Basic markdown-like formatting
   return text
     .replace(/```(\w*)\n([\s\S]*?)```/g, "<pre><code>$2</code></pre>")
     .replace(/`([^`]+)`/g, "<code>$1</code>")
@@ -82,24 +76,31 @@ function formatContent(text) {
 function appendMessage(role, content, time = "", animate = true) {
   const div = document.createElement("div");
   div.className = `message ${role}`;
-  if (!animate) div.style.animation = "none", div.style.opacity = "1";
+  if (!animate) { div.style.animation = "none"; div.style.opacity = "1"; }
+
+  const inner = document.createElement("div");
+  inner.className = "message-inner";
+
+  const avatar = document.createElement("div");
+  avatar.className = `avatar ${role === "user" ? "user-avatar" : "ai-avatar"}`;
+  avatar.textContent = role === "user" ? "U" : "A";
 
   const bubble = document.createElement("div");
   bubble.className = "message-bubble";
   if (content.startsWith("⚠")) bubble.classList.add("error-bubble");
   bubble.innerHTML = formatContent(content);
 
-  const meta = document.createElement("div");
-  meta.className = "msg-meta";
-  meta.textContent = role === "user" ? `You · ${time || formatTime()}` : `AskAI · ${time || formatTime()}`;
+  const timeEl = document.createElement("div");
+  timeEl.className = "msg-time";
+  timeEl.textContent = time || formatTime();
 
-  const wrapper = document.createElement("div");
-  wrapper.style.maxWidth = "680px";
-  wrapper.style.width = role === "assistant" ? "100%" : "auto";
-  wrapper.appendChild(bubble);
-  wrapper.appendChild(meta);
+  const textWrap = document.createElement("div");
+  textWrap.appendChild(bubble);
+  textWrap.appendChild(timeEl);
 
-  div.appendChild(wrapper);
+  inner.appendChild(avatar);
+  inner.appendChild(textWrap);
+  div.appendChild(inner);
   messagesEl.appendChild(div);
   scrollToBottom();
 }
@@ -109,13 +110,14 @@ function showThinking() {
   div.className = "thinking";
   div.id = "thinking";
   div.innerHTML = `
-    <div class="dots">
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-    </div>
-    <span>AskAI is thinking...</span>
-  `;
+    <div class="thinking-inner">
+      <div class="thinking-avatar">A</div>
+      <div class="dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>`;
   messagesEl.appendChild(div);
   scrollToBottom();
 }
@@ -160,7 +162,7 @@ async function sendMessage() {
     appendMessage("assistant", "⚠ Network error. Please check your connection.");
   } finally {
     isLoading = false;
-    sendBtn.disabled = false;
+    sendBtn.disabled = userInput.value.trim() === "";
     userInput.disabled = false;
     userInput.focus();
   }
